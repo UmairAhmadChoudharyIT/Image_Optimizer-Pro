@@ -5,11 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Image Optimizer Pro – Tech Explorers Pakistan</title>
-  <!-- Enables crossOriginIsolated (SharedArrayBuffer) via a Service Worker, since GitHub
-       Pages can't set custom COOP/COEP response headers. Needs coi-serviceworker.js
-       uploaded to the SAME folder as this file (service workers must be same-origin —
-       they can't be loaded from a CDN). Must load before anything else. -->
-  <script src="coi-serviceworker.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -35,6 +30,35 @@
       color: var(--text);
       min-height: 100vh;
     }
+
+    /* ── PROMO BANNER (top-left) ── */
+    .promo-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0 0 24px;
+      padding: 12px 22px;
+      background: linear-gradient(135deg, rgba(0,200,150,.16), rgba(0,200,150,.04));
+      border: 1px solid rgba(0,200,150,.35);
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,200,150,.10);
+      max-width: calc(100% - 48px);
+    }
+    .promo-icon { font-size: 22px; flex-shrink: 0; }
+    .promo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+    }
+    .promo-wa {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .promo-wa:hover { text-decoration: underline; }
 
     /* ── NAV ── */
     nav {
@@ -297,26 +321,6 @@
     .switch input:checked + .slider { background: var(--green); }
     .switch input:checked + .slider::before { transform: translateX(18px); }
 
-    .color-row { display: flex; align-items: center; gap: 10px; }
-    .color-row input[type=color] {
-      width: 44px; height: 36px;
-      padding: 2px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      background: rgba(255,255,255,.05);
-    }
-    .color-row input[type=text] {
-      flex: 1;
-      background: rgba(255,255,255,.05);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 10px 14px;
-      font-size: 14px;
-      outline: none;
-    }
-
     .section-divider {
       height: 1px;
       background: var(--border);
@@ -440,31 +444,6 @@
     }
     .result-error .result-name { color: var(--danger); }
 
-    /* ── AI LOADING BANNER ── */
-    .ai-loading-banner {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      background: rgba(0,200,150,.08);
-      border: 1px solid rgba(0,200,150,.25);
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--green);
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-    .ai-loading-banner.show { display: flex; }
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(0,200,150,.3);
-      border-top-color: var(--green);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-      flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     /* ── FOOTER CARD ── */
     .footer-card {
       background: linear-gradient(135deg, rgba(0,200,150,.08), rgba(0,200,150,.03));
@@ -522,25 +501,13 @@
 </head>
 <body>
 
+<!-- PROMO BANNER -->
+<div class="promo-banner">
+  <span class="promo-icon">🤖</span>
+  <p class="promo-text">For Artificial Intelligence Training From Absolute Beginner To Professional Level , <a href="https://wa.me/923337006700" target="_blank" class="promo-wa">Whatsapp 03337006700</a></p>
+</div>
+
 <!-- NAV -->
-<script type="module">
-  try {
-    // esm.sh bundles the transitive "onnxruntime-web" peer dependency automatically —
-    // loading the raw jsdelivr dist file does NOT, since that file contains a bare
-    // `import ... from "onnxruntime-web"` specifier that plain browser ESM can't resolve.
-    const mod = await import("https://esm.sh/@imgly/background-removal@1.5.8");
-    const bgConfig = {
-      model: 'isnet_quint8', // ~40MB quantized model — smaller & more reliable on slow connections than the ~80MB default
-      progress: (key, current, total) => {
-        if (window.__bgModelProgress) window.__bgModelProgress(key, current, total);
-      }
-    };
-    window.__removeBackground = (file) => mod.default(file, bgConfig);
-  } catch (err) {
-    console.error('Failed to load background-removal library:', err);
-    window.__bgModelLoadError = 'Could not load the AI model (network or CDN blocked). Check your internet connection.';
-  }
-</script>
 <nav>
   <div class="brand">
     <div class="brand-icon">🖼</div>
@@ -565,7 +532,7 @@
 <!-- HERO -->
 <div class="hero">
   <div class="hero-eyebrow">⚡ Client-Side · Privacy First · No Server</div>
-  <h1>Compress, Resize &amp;<br><span>Remove Background</span></h1>
+  <h1>Compress &amp; Resize<br><span>Images Instantly</span></h1>
   <p class="hero-sub">Process up to 100 images at once — right in your browser. No data leaves your device. WhatsApp, social media, and web-ready in seconds.</p>
 </div>
 
@@ -575,7 +542,7 @@
   <div class="stat"><div class="stat-num">100</div><div class="stat-label">Images per batch</div></div>
   <div class="stat"><div class="stat-num">0KB</div><div class="stat-label">Uploaded to any server</div></div>
   <div class="stat"><div class="stat-num">5</div><div class="stat-label">Output formats</div></div>
-  <div class="stat"><div class="stat-num">AI</div><div class="stat-label">BG removal engine</div></div>
+  <div class="stat"><div class="stat-num">24KB</div><div class="stat-label">Exact output size</div></div>
 </div>
 
 <!-- MAIN -->
@@ -601,12 +568,6 @@
             <span class="fmt-tag">AVIF</span>
           </div>
         </div>
-      </div>
-
-      <!-- AI LOADING BANNER -->
-      <div class="ai-loading-banner" id="aiBanner">
-        <div class="spinner"></div>
-        <div id="aiMsg">Loading AI background removal model… (first run only, ~5 MB)</div>
       </div>
 
       <!-- PROGRESS -->
@@ -672,42 +633,6 @@
             <div class="range-row">
               <input type="range" id="quality" min="10" max="100" value="85" step="1" />
               <input type="number" id="qualityNum" min="10" max="100" value="85" />
-            </div>
-          </div>
-
-          <div class="section-divider"></div>
-
-          <!-- BG REMOVAL -->
-          <div class="toggle-row">
-            <div>
-              <div class="toggle-label">🤖 Remove Background</div>
-              <div class="toggle-desc">AI-powered — runs offline</div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="removeBg" checked />
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <!-- BG COLOR (shows when BG removal on) -->
-          <div class="field" id="bgColorField" style="display:block;">
-            <label>Background After Removal</label>
-            <div class="toggle-row" style="margin-bottom:10px;">
-              <div>
-                <div class="toggle-label">🫥 Transparent (no fill)</div>
-                <div class="toggle-desc">Keeps real alpha — auto-switches output to PNG</div>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="transparentBg" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div id="bgColorPickerRow">
-              <div class="color-row">
-                <input type="color" id="bgColorPicker" value="#ffffff" />
-                <input type="text" id="bgColorHex" value="#ffffff" maxlength="7" placeholder="#ffffff" />
-              </div>
-              <div style="font-size:11px;color:var(--muted);margin-top:6px;">Fills the removed area with this solid color (white matches CNIC/passport photo requirements)</div>
             </div>
           </div>
 
@@ -781,15 +706,6 @@ const progressText= document.getElementById('progressText');
 const resultGrid  = document.getElementById('resultGrid');
 const resultsSection = document.getElementById('resultsSection');
 const resultsSummary = document.getElementById('resultsSummary');
-const aiBanner    = document.getElementById('aiBanner');
-const aiMsg       = document.getElementById('aiMsg');
-
-/* Real download-progress feedback from the AI model loader (see module script above) */
-window.__bgModelProgress = (key, current, total) => {
-  if (!total) return;
-  const pct = Math.round((current / total) * 100);
-  aiMsg.textContent = `🤖 Downloading AI model (${key}): ${pct}% — first run only, then cached`;
-};
 
 /* ── GLOBAL COMPRESSION COUNTER (CountAPI — no signup, no setup needed) ── */
 // This uses a free public counting service. The key below is unique to this
@@ -854,27 +770,12 @@ updatePktClock();
 setInterval(updatePktClock, 1000);
 
 /* ── FORMAT TABS ── */
-const transparentBgToggle = document.getElementById('transparentBg');
-const bgColorPickerRow = document.getElementById('bgColorPickerRow');
-
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (btn.dataset.fmt === 'jpeg' && transparentBgToggle.checked) {
-      alert('JPEG can\'t store transparency. Turn off "Transparent" first, or pick PNG/WEBP.');
-      return;
-    }
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     outputFmt = btn.dataset.fmt;
   });
-});
-
-transparentBgToggle.addEventListener('change', e => {
-  bgColorPickerRow.style.display = e.target.checked ? 'none' : 'block';
-  if (e.target.checked && outputFmt === 'jpeg') {
-    // JPEG has no alpha channel — auto-switch to PNG so transparency actually survives export
-    document.querySelector('.tab-btn[data-fmt="png"]').click();
-  }
 });
 
 /* ── RANGE ↔ NUMBER SYNC ── */
@@ -886,18 +787,7 @@ function syncRange(rangeId, numId) {
 syncRange('targetKb', 'targetKbNum');
 syncRange('quality', 'qualityNum');
 
-/* ── BG COLOR SYNC ── */
-const bgPicker = document.getElementById('bgColorPicker');
-const bgHex    = document.getElementById('bgColorHex');
-bgPicker.addEventListener('input', () => { bgHex.value = bgPicker.value; });
-bgHex.addEventListener('input', () => {
-  if (/^#[0-9a-fA-F]{6}$/.test(bgHex.value)) bgPicker.value = bgHex.value;
-});
-
 /* ── TOGGLE PANELS ── */
-document.getElementById('removeBg').addEventListener('change', e => {
-  document.getElementById('bgColorField').style.display = e.target.checked ? 'block' : 'none';
-});
 document.getElementById('addWatermark').addEventListener('change', e => {
   document.getElementById('watermarkField').style.display = e.target.checked ? 'block' : 'none';
 });
@@ -929,35 +819,10 @@ function updateDropZone() {
 }
 
 /* ── HELPERS ── */
-function waitForBgModel(timeoutMs = 45000) {
-  return new Promise((resolve, reject) => {
-    if (window.__removeBackground) return resolve();
-    if (window.__bgModelLoadError) return reject(new Error(window.__bgModelLoadError));
-    const start = Date.now();
-    const iv = setInterval(() => {
-      if (window.__removeBackground) {
-        clearInterval(iv);
-        resolve();
-      } else if (window.__bgModelLoadError) {
-        clearInterval(iv);
-        reject(new Error(window.__bgModelLoadError));
-      } else if (Date.now() - start > timeoutMs) {
-        clearInterval(iv);
-        reject(new Error('Timed out loading the AI model (45s). Check your internet connection and try again.'));
-      }
-    }, 150);
-  });
-}
-
 function fmtSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
   return (bytes/1024/1024).toFixed(2) + ' MB';
-}
-
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return {r,g,b};
 }
 
 /* ── EXACT-SIZE PADDING (hits the fixed 24 KB target precisely) ──
@@ -1019,13 +884,6 @@ async function processImage(file, opts) {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
 
-      // BG color fill — only when the user actually wants a solid fill (not transparent mode)
-      if (opts.removeBg && !opts.transparentBg && opts.bgColor) {
-        const c = hexToRgb(opts.bgColor);
-        ctx.fillStyle = `rgb(${c.r},${c.g},${c.b})`;
-        ctx.fillRect(0, 0, width, height);
-      }
-
       ctx.drawImage(img, 0, 0, width, height);
 
       // Watermark
@@ -1041,10 +899,7 @@ async function processImage(file, opts) {
       }
 
       // Compress to EXACT target size (opts.targetKb is fixed at 24 KB)
-      let mimeOut = opts.fmt === 'png' ? 'image/png' : opts.fmt === 'webp' ? 'image/webp' : 'image/jpeg';
-      if (opts.removeBg && opts.transparentBg && mimeOut === 'image/jpeg') {
-        mimeOut = 'image/png'; // safety net: JPEG can't hold alpha, force a format that can
-      }
+      const mimeOut = opts.fmt === 'png' ? 'image/png' : opts.fmt === 'webp' ? 'image/webp' : 'image/jpeg';
       const targetBytes = opts.targetKb * 1024;
       let quality = opts.quality / 100;
 
@@ -1076,9 +931,6 @@ processBtn.addEventListener('click', async () => {
     maxH:      800,  // 🔒 fixed — Max Height is locked to exactly 800 px
     quality:   parseInt(document.getElementById('qualityNum').value) || 85,
     fmt:       outputFmt,
-    removeBg:  document.getElementById('removeBg').checked,
-    transparentBg: document.getElementById('transparentBg').checked,
-    bgColor:   document.getElementById('bgColorHex').value,
     watermark: document.getElementById('addWatermark').checked ? document.getElementById('watermarkText').value : null,
   };
 
@@ -1101,25 +953,7 @@ processBtn.addEventListener('click', async () => {
     progressText.textContent = `Processing ${i+1} of ${files.length}: ${file.name}`;
 
     try {
-      let workingFile = file;
-      let bgRemovalFailed = false;
-
-      // BG removal via @imgly/background-removal
-      if (opts.removeBg) {
-        aiBanner.classList.add('show');
-        aiMsg.textContent = `🤖 Removing background from ${file.name}…`;
-        try {
-          await waitForBgModel();
-          const removedBlob = await window.__removeBackground(file);
-          workingFile = new File([removedBlob], file.name, { type: 'image/png' });
-        } catch(e) {
-          console.warn('BG removal failed:', e);
-          bgRemovalFailed = true; // fall through and still process the original image below
-        }
-        aiBanner.classList.remove('show');
-      }
-
-      const blob = await processImage(workingFile, opts);
+      const blob = await processImage(file, opts);
       const ext = opts.fmt === 'original' ? file.name.split('.').pop() : opts.fmt === 'jpeg' ? 'jpg' : opts.fmt;
       const outName = file.name.replace(/\.[^.]+$/, '') + '_optimized.' + ext;
 
@@ -1128,7 +962,7 @@ processBtn.addEventListener('click', async () => {
       totalSaved += Math.max(0, file.size - blob.size);
       successCount++;
 
-      addResultCard(file, blob, outName, bgRemovalFailed);
+      addResultCard(file, blob, outName);
 
       // Update the universal counter immediately, one image at a time
       incrementCounter(1);
@@ -1148,7 +982,7 @@ processBtn.addEventListener('click', async () => {
   processBtn.disabled = false;
 });
 
-function addResultCard(origFile, blob, outName, bgRemovalFailed) {
+function addResultCard(origFile, blob, outName) {
   const url = URL.createObjectURL(blob);
   const saved = origFile.size - blob.size;
   const savedPct = Math.round((saved / origFile.size) * 100);
@@ -1166,7 +1000,6 @@ function addResultCard(origFile, blob, outName, bgRemovalFailed) {
       <div class="result-saved ${positive ? 'saved-positive' : 'saved-negative'}">
         ${positive ? '▼' : '▲'} ${Math.abs(savedPct)}% ${positive ? 'saved' : 'larger'}
       </div>
-      ${bgRemovalFailed ? '<div style="font-size:10px;color:var(--warn);margin-top:4px;">⚠ BG removal failed — original background kept</div>' : ''}
     </div>
     <a class="result-dl" href="${url}" download="${outName}">⬇ Download</a>
   `;
@@ -1212,7 +1045,6 @@ clearBtn.addEventListener('click', () => {
   dlAllBtn.classList.remove('visible');
   clearBtn.classList.remove('visible');
   processBtn.disabled = true;
-  aiBanner.classList.remove('show');
   dropZone.querySelector('.dz-icon').textContent = '📂';
   dropZone.querySelector('.dz-title').textContent = 'Drop your images here';
   dropZone.querySelector('.dz-sub').innerHTML = 'or <strong>click to browse</strong> — up to 100 images';
