@@ -5,6 +5,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Image Optimizer Pro – Tech Explorers Pakistan</title>
+  <!-- Enables crossOriginIsolated (SharedArrayBuffer) via a Service Worker, since GitHub
+       Pages can't set custom COOP/COEP response headers. Needs coi-serviceworker.js
+       uploaded to the SAME folder as this file (service workers must be same-origin —
+       they can't be loaded from a CDN). Must load before anything else. -->
+  <script src="coi-serviceworker.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -520,8 +525,17 @@
 <!-- NAV -->
 <script type="module">
   try {
-    const mod = await import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.8/dist/index.mjs");
-    window.__removeBackground = mod.default;
+    // esm.sh bundles the transitive "onnxruntime-web" peer dependency automatically —
+    // loading the raw jsdelivr dist file does NOT, since that file contains a bare
+    // `import ... from "onnxruntime-web"` specifier that plain browser ESM can't resolve.
+    const mod = await import("https://esm.sh/@imgly/background-removal@1.5.8");
+    const bgConfig = {
+      model: 'isnet_quint8', // ~40MB quantized model — smaller & more reliable on slow connections than the ~80MB default
+      progress: (key, current, total) => {
+        if (window.__bgModelProgress) window.__bgModelProgress(key, current, total);
+      }
+    };
+    window.__removeBackground = (file) => mod.default(file, bgConfig);
   } catch (err) {
     console.error('Failed to load background-removal library:', err);
     window.__bgModelLoadError = 'Could not load the AI model (network or CDN blocked). Check your internet connection.';
@@ -769,6 +783,13 @@ const resultsSection = document.getElementById('resultsSection');
 const resultsSummary = document.getElementById('resultsSummary');
 const aiBanner    = document.getElementById('aiBanner');
 const aiMsg       = document.getElementById('aiMsg');
+
+/* Real download-progress feedback from the AI model loader (see module script above) */
+window.__bgModelProgress = (key, current, total) => {
+  if (!total) return;
+  const pct = Math.round((current / total) * 100);
+  aiMsg.textContent = `🤖 Downloading AI model (${key}): ${pct}% — first run only, then cached`;
+};
 
 /* ── GLOBAL COMPRESSION COUNTER (CountAPI — no signup, no setup needed) ── */
 // This uses a free public counting service. The key below is unique to this
@@ -1081,20 +1102,19 @@ processBtn.addEventListener('click', async () => {
 
     try {
       let workingFile = file;
+      let bgRemovalFailed = false;
 
       // BG removal via @imgly/background-removal
       if (opts.removeBg) {
         aiBanner.classList.add('show');
-        aiMsg.textContent = `🤖 Removing background from ${file.name}… (first image may take up to a minute while the AI model downloads)`;
+        aiMsg.textContent = `🤖 Removing background from ${file.name}…`;
         try {
           await waitForBgModel();
           const removedBlob = await window.__removeBackground(file);
           workingFile = new File([removedBlob], file.name, { type: 'image/png' });
         } catch(e) {
           console.warn('BG removal failed:', e);
-          addErrorCard(file, 'Background removal failed: ' + e.message + ' — image skipped. You can retry, check your connection, or turn off "Remove Background" to still resize/compress this image.');
-          aiBanner.classList.remove('show');
-          continue;
+          bgRemovalFailed = true; // fall through and still process the original image below
         }
         aiBanner.classList.remove('show');
       }
@@ -1108,7 +1128,7 @@ processBtn.addEventListener('click', async () => {
       totalSaved += Math.max(0, file.size - blob.size);
       successCount++;
 
-      addResultCard(file, blob, outName);
+      addResultCard(file, blob, outName, bgRemovalFailed);
 
       // Update the universal counter immediately, one image at a time
       incrementCounter(1);
@@ -1128,7 +1148,7 @@ processBtn.addEventListener('click', async () => {
   processBtn.disabled = false;
 });
 
-function addResultCard(origFile, blob, outName) {
+function addResultCard(origFile, blob, outName, bgRemovalFailed) {
   const url = URL.createObjectURL(blob);
   const saved = origFile.size - blob.size;
   const savedPct = Math.round((saved / origFile.size) * 100);
@@ -1146,6 +1166,7 @@ function addResultCard(origFile, blob, outName) {
       <div class="result-saved ${positive ? 'saved-positive' : 'saved-negative'}">
         ${positive ? '▼' : '▲'} ${Math.abs(savedPct)}% ${positive ? 'saved' : 'larger'}
       </div>
+      ${bgRemovalFailed ? '<div style="font-size:10px;color:var(--warn);margin-top:4px;">⚠ BG removal failed — original background kept</div>' : ''}
     </div>
     <a class="result-dl" href="${url}" download="${outName}">⬇ Download</a>
   `;
